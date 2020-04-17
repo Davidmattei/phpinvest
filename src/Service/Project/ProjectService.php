@@ -19,7 +19,7 @@ final class ProjectService
 
     public function getAll(): ProjectCollection
     {
-        return ProjectCollection::fromArray($this->repository->findAll()->toArray());
+        return new ProjectCollection(...$this->repository->findAll()->toArray());
     }
 
     public function getByName(string $name): ?Project

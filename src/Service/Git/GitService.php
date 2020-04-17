@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpInvest\Service\Git;
 
+use PhpInvest\Entity\GitRevision;
 use PhpInvest\Entity\Project;
 use PhpInvest\Exception\Git\AlreadyExistsException;
 use PhpInvest\Exception\Git\CheckoutNotFoundException;
@@ -12,17 +13,20 @@ use PhpInvest\Process\ComposerProcess;
 use PhpInvest\Process\Git\CheckoutProcess;
 use PhpInvest\Process\Git\CloneProcess;
 use PhpInvest\Process\Git\PullProcess;
+use PhpInvest\Repository\GitRevisionRepository;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class GitService
 {
     private Filesystem $filesystem;
     private string $projectDir;
+    private GitRevisionRepository $revisionRepository;
 
-    public function __construct(string $projectDir)
+    public function __construct(string $projectDir, GitRevisionRepository $revisionRepository)
     {
         $this->filesystem = new Filesystem();
         $this->projectDir = $projectDir;
+        $this->revisionRepository = $revisionRepository;
     }
 
     public function checkout(Checkout $checkout, string $branch): void
@@ -54,11 +58,24 @@ final class GitService
             throw new CheckoutNotFoundException($directory, $project);
         }
 
-        return CheckoutFactory::create($directory);
+        return CheckoutFactory::create($directory, $project);
     }
 
-    private function getDirectory(Project $project): ?string
+    public function getDirectory(Project $project): ?string
     {
         return sprintf('%s/checkout/%s', $this->projectDir, $project->getName());
+    }
+
+    public function getRevision(Project $project): GitRevision
+    {
+        $checkout = $this->getCheckout($project);
+        $revision = $this->revisionRepository->findByCheckout($checkout);
+
+        if (null === $revision) {
+            $revision = GitRevision::fromCheckout($checkout);
+            $this->revisionRepository->create($revision);
+        }
+
+        return $revision;
     }
 }

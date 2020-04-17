@@ -10,14 +10,14 @@ final class ProjectCollection implements \IteratorAggregate
 {
     private array $projects;
 
-    private function __construct(array $projects)
+    public function __construct(Project ...$projects)
     {
         $this->projects = $projects;
     }
 
     public function add(Project $project): ProjectCollection
     {
-        return new self([...$this->projects, $project]);
+        return new self($project, ...$this->projects);
     }
 
     public function count(): int
@@ -27,23 +27,12 @@ final class ProjectCollection implements \IteratorAggregate
 
     public function filter(callable $callback): ProjectCollection
     {
-        return new self(array_filter($this->projects, $callback));
+        return new self(...array_filter($this->projects, $callback));
     }
 
     public function first(): ?Project
     {
         return $this->projects[0] ?? null;
-    }
-
-    public static function fromArray(array $projects): ProjectCollection
-    {
-        $collection = new self([]);
-
-        foreach ($projects as $project) {
-            $collection = $collection->add($project);
-        }
-
-        return $collection;
     }
 
     /**

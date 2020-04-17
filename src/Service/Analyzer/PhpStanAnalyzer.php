@@ -5,21 +5,28 @@ declare(strict_types=1);
 namespace PhpInvest\Service\Analyzer;
 
 use PhpInvest\Entity\Project;
-use PhpInvest\Service\Invest\InvestService;
+//use PhpInvest\Process\PhpStan\AnalyseProcess;
+use PhpInvest\Service\File\FileService;
+use PhpInvest\Service\Git\GitService;
 
 final class PhpStanAnalyzer
 {
-    private InvestService $investService;
+    private FileService $fileService;
+    private GitService $gitService;
 
-    public function __construct(InvestService $investService)
+    public function __construct(FileService $fileService, GitService $gitService)
     {
-        $this->investService = $investService;
+        $this->fileService = $fileService;
+        $this->gitService = $gitService;
     }
 
     public function analyze(Project $project): void
     {
-        $invest = $this->investService->getByProject($project);
-        $directory = $invest->getCheckout()->getDirectory();
-        $json = AnalyseProcess::init($directory, 7)->run()->getJson();
+        $directory = $this->gitService->getDirectory($project);
+        $revision = $this->gitService->getRevision($project);
+
+        $this->fileService->scan($directory, $revision);
+
+        //$json = AnalyseProcess::init($directory, 7)->run()->getJson();
     }
 }

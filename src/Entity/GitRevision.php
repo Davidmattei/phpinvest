@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PhpInvest\Entity;
 
+use PhpInvest\Invest\Git\Checkout;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
@@ -17,7 +18,7 @@ final class GitRevision
     private UuidInterface $id;
     private Project $project;
 
-    public function __construct(
+    private function __construct(
         string $author,
         string $authorEmail,
         string $branch,
@@ -34,8 +35,15 @@ final class GitRevision
         $this->project = $project;
     }
 
-    public function getBranch(): string
+    public static function fromCheckout(Checkout $checkout): GitRevision
     {
-        return $this->branch;
+        return new self(
+            $checkout->getAuthor(),
+            $checkout->getAuthorEmail(),
+            $checkout->getBranch(),
+            $checkout->getCommitDate(),
+            $checkout->getHash(),
+            $checkout->getProject()
+        );
     }
 }

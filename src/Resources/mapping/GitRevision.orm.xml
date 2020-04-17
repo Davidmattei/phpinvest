@@ -16,5 +16,8 @@
         <field name="branch"/>
         <field name="commitDate" column="commit_date" type="date_immutable"/>
         <field name="hash"/>
+        <many-to-one field="project" target-entity="PhpInvest\Entity\Project" inversed-by="gitRevisions">
+            <join-column name="project_id" nullable="false"/>
+        </many-to-one>
     </entity>
 </doctrine-mapping>

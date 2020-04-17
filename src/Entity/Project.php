@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PhpInvest\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
@@ -14,6 +16,8 @@ final class Project
     private string $name;
     private string $organizationName;
     private string $repositoryName;
+    private Collection $gitRevisions;
+
 
     public function __construct(string $host, string $name, string $organizationName, string $repositoryName)
     {
@@ -22,6 +26,7 @@ final class Project
         $this->name = $name;
         $this->organizationName = $organizationName;
         $this->repositoryName = $repositoryName;
+        $this->gitRevisions = new ArrayCollection();
     }
 
     public function __toString(): string
